@@ -1,0 +1,45 @@
+import requests
+def fetch_conversion_rate(crypto="ethereum", fiat="usd"):
+    """Fetch the real-time conversion rate of a cryptocurrency to fiat."""
+    url = f"https://api.coingecko.com/api/v3/simple/price?ids={crypto}&vs_currencies={fiat}"
+    try:
+        response = requests.get(url, timeout=10).json()
+        if fiat in response.get(crypto, {}):
+            return response[crypto][fiat]
+        else:
+            print("Invalid currency or cryptocurrency name. Please try again.")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching data: {e}")
+        return None
+def convert_crypto_to_fiat(crypto_amount, crypto="ethereum", fiat="usd"):
+    """Convert a cryptocurrency amount to fiat currency using real-time rates."""
+    rate = fetch_conversion_rate(crypto, fiat)
+    if rate:
+        fiat_value = crypto_amount * rate
+        print(f"\n{crypto_amount} {crypto.capitalize()} = {fiat_value:.2f} {fiat.upper()}")
+        print(f"Conversion rate: 1 {crypto.capitalize()} = {rate:.2f} {fiat.upper()}")
+    else:
+        print("Conversion failed. Check your inputs.")
+def main():
+    print("💰 Welcome to the Crypto2Fiat Converter 💱\n")
+    while True:
+        try:
+            # User inputs
+            crypto = input("Enter the cryptocurrency name (e.g., ethereum, bitcoin): ").lower().strip()
+            fiat = input("Enter the fiat currency code (e.g., usd, eur, gbp): ").lower().strip()
+            crypto_amount = float(input(f"Enter the amount of {crypto} to convert: "))
+            # Perform conversion
+            convert_crypto_to_fiat(crypto_amount, crypto, fiat)
+            # Ask to continue or exit
+            choice = input("\nDo you want to perform another conversion? (yes/no): ").lower().strip()
+            if choice not in ["yes", "y"]:
+                print("Goodbye! 👋")
+                break
+        except ValueError:
+            print("Invalid input. Please enter numeric values for the amount.")
+        except KeyboardInterrupt:
+            print("\nProgram interrupted. Goodbye!")
+            break
+if __name__ == "__main__":
+    main()
